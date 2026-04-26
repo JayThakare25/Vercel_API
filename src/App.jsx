@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, User, Bot, Trash2 } from 'lucide-react';
+import { Send, Trash2, ArrowUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Markdown from 'markdown-to-jsx';
 
 function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { id: 1, role: 'ai', content: "Hello! I'm your private AI assistant. How can I help you today?" }
+    { id: 1, role: 'ai', content: "Private AI Assistant. How can I help you today?" }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const chatEndRef = useRef(null);
@@ -41,7 +41,6 @@ function App() {
       });
 
       const data = await response.json();
-      
       if (data.error) throw new Error(data.error);
 
       setMessages(prev => [...prev, { 
@@ -53,7 +52,7 @@ function App() {
       setMessages(prev => [...prev, { 
         id: Date.now() + 1, 
         role: 'ai', 
-        content: `**Error:** ${error.message}. Make sure your GEMINI_API_KEY is configured in Vercel.` 
+        content: `Error: ${error.message}` 
       }]);
     } finally {
       setIsLoading(false);
@@ -61,74 +60,70 @@ function App() {
   };
 
   const clearChat = () => {
-    setMessages([{ id: Date.now(), role: 'ai', content: "Chat cleared. How can I help you now?" }]);
+    setMessages([{ id: Date.now(), role: 'ai', content: "Chat cleared." }]);
   };
 
   return (
     <div className="app-container">
-      <div className="bg-mesh"></div>
-      
       <header className="header">
         <div className="logo">
-          <Sparkles size={28} />
           <h1>Gemini Proxy</h1>
         </div>
-        <button onClick={clearChat} className="send-btn" style={{ background: 'transparent', border: '1px solid var(--glass-border)', padding: '10px' }}>
-          <Trash2 size={20} />
+        <button onClick={clearChat} style={{ background: 'transparent', border: 'none', color: '#555', cursor: 'pointer' }}>
+          <Trash2 size={18} />
         </button>
       </header>
 
-      <main className="chat-window glass">
+      <main className="chat-window">
         <AnimatePresence>
           {messages.map((msg) => (
             <motion.div
               key={msg.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className={`message ${msg.role}`}
             >
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '8px', alignItems: 'center' }}>
-                {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
-                <span style={{ fontSize: '0.8rem', fontWeight: 600, opacity: 0.8 }}>
-                  {msg.role === 'user' ? 'You' : 'AI Assistant'}
-                </span>
-              </div>
-              <div className="markdown">
-                <Markdown>{msg.content}</Markdown>
+              <span className="message-label">{msg.role === 'user' ? 'You' : 'Assistant'}</span>
+              <div className="message-content">
+                <div className="markdown">
+                  <Markdown>{msg.content}</Markdown>
+                </div>
               </div>
             </motion.div>
           ))}
         </AnimatePresence>
         
         {isLoading && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            className="message ai"
-          >
-            <div className="markdown">Thinking...</div>
-          </motion.div>
+          <div className="message ai">
+            <span className="message-label">Assistant</span>
+            <div className="typing">
+              <div className="dot"></div>
+              <div className="dot"></div>
+              <div className="dot"></div>
+            </div>
+          </div>
         )}
         <div ref={chatEndRef} />
       </main>
 
-      <form onSubmit={handleSubmit} className="input-container glass-dark" style={{ borderRadius: '24px' }}>
-        <input
-          type="text"
-          className="input-field"
-          placeholder="Ask me anything..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={isLoading}
-        />
-        <button type="submit" className="send-btn" disabled={isLoading || !input.trim()}>
-          <Send size={20} />
-        </button>
-      </form>
-      
-      <footer style={{ textAlign: 'center', marginTop: '10px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-        Built for educational purposes. Private & Secure.
-      </footer>
+      <div className="input-container-wrapper">
+        <form onSubmit={handleSubmit} className="input-container">
+          <input
+            type="text"
+            className="input-field"
+            placeholder="Message Gemini..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={isLoading}
+          />
+          <button type="submit" className="send-btn" disabled={isLoading || !input.trim()}>
+            <ArrowUp size={18} />
+          </button>
+        </form>
+        <div style={{ textAlign: 'center', marginTop: '12px', color: '#333', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Unrestricted Access • Powered by Gemini 2.5
+        </div>
+      </div>
     </div>
   );
 }
