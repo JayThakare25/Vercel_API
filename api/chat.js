@@ -23,7 +23,12 @@ export default async function handler(req, res) {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents }),
+        body: JSON.stringify({ 
+          contents,
+          system_instruction: {
+            parts: [{ text: "You are a highly efficient assistant. Be extremely concise, brief, and direct. Do not waste tokens on pleasantries or long explanations unless specifically asked." }]
+          }
+        }),
       }
     );
 
