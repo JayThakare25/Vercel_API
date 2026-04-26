@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Trash2, ArrowUp } from 'lucide-react';
+import { ArrowUp, Trash2, User, Bot, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Markdown from 'markdown-to-jsx';
 
 function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { id: 1, role: 'ai', content: "Private AI Assistant. How can I help you today?" }
+    { id: 1, role: 'ai', content: "# Welcome to Gemini Proxy\nThis is your private space for unrestricted AI access. How can I assist you today?" }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const chatEndRef = useRef(null);
@@ -52,7 +52,7 @@ function App() {
       setMessages(prev => [...prev, { 
         id: Date.now() + 1, 
         role: 'ai', 
-        content: `Error: ${error.message}` 
+        content: `### ⚠️ Connection Error\n${error.message}` 
       }]);
     } finally {
       setIsLoading(false);
@@ -60,18 +60,21 @@ function App() {
   };
 
   const clearChat = () => {
-    setMessages([{ id: Date.now(), role: 'ai', content: "Chat cleared." }]);
+    setMessages([{ id: Date.now(), role: 'ai', content: "Chat cleared. New session started." }]);
   };
 
   return (
     <div className="app-container">
       <header className="header">
-        <div className="logo">
-          <h1>Gemini Proxy</h1>
+        <div className="logo-group">
+          <div className="status-dot"></div>
+          <h1>GEMINI PROXY</h1>
         </div>
-        <button onClick={clearChat} style={{ background: 'transparent', border: 'none', color: '#555', cursor: 'pointer' }}>
-          <Trash2 size={18} />
-        </button>
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <button onClick={clearChat} style={{ background: 'transparent', border: 'none', color: '#777', cursor: 'pointer' }}>
+            <Trash2 size={20} />
+          </button>
+        </div>
       </header>
 
       <main className="chat-window">
@@ -79,12 +82,15 @@ function App() {
           {messages.map((msg) => (
             <motion.div
               key={msg.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className={`message ${msg.role}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`message-tile ${msg.role}`}
             >
-              <span className="message-label">{msg.role === 'user' ? 'You' : 'Assistant'}</span>
-              <div className="message-content">
+              <div className="tile-header">
+                {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
+                <span>{msg.role === 'user' ? 'You' : 'Assistant'}</span>
+              </div>
+              <div className="tile-content">
                 <div className="markdown">
                   <Markdown>{msg.content}</Markdown>
                 </div>
@@ -94,35 +100,38 @@ function App() {
         </AnimatePresence>
         
         {isLoading && (
-          <div className="message ai">
-            <span className="message-label">Assistant</span>
-            <div className="typing">
-              <div className="dot"></div>
-              <div className="dot"></div>
-              <div className="dot"></div>
+          <div className="message-tile ai">
+            <div className="tile-header">
+              <Sparkles size={14} />
+              <span>Thinking</span>
+            </div>
+            <div className="typing-indicator">
+              <div className="typing-dot"></div>
+              <div className="typing-dot"></div>
+              <div className="typing-dot"></div>
             </div>
           </div>
         )}
         <div ref={chatEndRef} />
       </main>
 
-      <div className="input-container-wrapper">
-        <form onSubmit={handleSubmit} className="input-container">
+      <div className="footer-container">
+        <form onSubmit={handleSubmit} className="input-tile">
           <input
             type="text"
             className="input-field"
-            placeholder="Message Gemini..."
+            placeholder="Type a message..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
           />
           <button type="submit" className="send-btn" disabled={isLoading || !input.trim()}>
-            <ArrowUp size={18} />
+            <ArrowUp size={20} />
           </button>
         </form>
-        <div style={{ textAlign: 'center', marginTop: '12px', color: '#333', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Unrestricted Access • Powered by Gemini 2.5
-        </div>
+        <p style={{ textAlign: 'center', marginTop: '12px', fontSize: '0.65rem', color: '#444', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          Encrypted Session • Gemini 2.5 Flash
+        </p>
       </div>
     </div>
   );
